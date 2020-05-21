@@ -9,18 +9,24 @@ import org.springframework.boot.context.event.*
 import org.springframework.context.event.*
 import org.springframework.stereotype.*
 import java.io.*
+import java.lang.IllegalStateException
 import java.lang.management.*
+import java.nio.file.*
+import java.util.concurrent.*
 
 private val logger = KotlinLogging.logger {}
 
+@ExperimentalStdlibApi
 @Service
 class SyncService(
-    val directoryProperties: DirectoryProperties
+    private val directoryProperties: DirectoryProperties,
+    private val syncDispatcher: SyncDispatcher
 ) {
 
     @EventListener(ApplicationReadyEvent::class)
     fun sync() = runBlocking {
         val currentDirectory = File(directoryProperties.producerDir)
+        setIdForEveryFileInDirectory(currentDirectory)
 
         val watchChannel = currentDirectory.asWatchChannel(
             mode = KWatchChannel.Mode.Recursive,
@@ -33,7 +39,8 @@ class SyncService(
             try {
                 watchChannel.consumeEach { event: KWatchEvent ->
                     logger.info { "Got event: $event" }
-                    processEvent(event)
+//                    processEventForLocalConsumer(event)
+                    syncDispatcher.addEvent(event)
                 }
                 logger.info { "[SyncService] Service has finished monitoring" }
             } finally {
@@ -46,7 +53,7 @@ class SyncService(
         logger.info { "Finishing" }
     }
 
-    private fun processEvent(event: KWatchEvent) {
+    private fun processEventForLocalConsumer(event: KWatchEvent) {
         val consumersDir = directoryProperties.consumerDirs.map { File(it) }
 
         when (event.state) {
@@ -72,5 +79,11 @@ class SyncService(
                 }
             }
         }
+    }
+
+    private fun setIdForEveryFileInDirectory(file: File) {
+        logger.info(file.absolutePath)
+        Files.walk(file.toPath())
+            .forEach { it.toFile().setId()}
     }
 }

@@ -1,6 +1,6 @@
 fsync:
-  producerDir: C:\Users\Maksim\Desktop\test\producerDir
+  producerDir: C:\Users\Maksim\Desktop\Универ\Тесты\producer
   consumerDirs:
-    - C:\Users\Maksim\Desktop\test\consumerDir1
+    - C:\Users\Maksim\Desktop\Универ\Тесты\consumer1
 
 logging.level.root: INFO

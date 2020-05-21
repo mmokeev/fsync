@@ -33,6 +33,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
 	implementation("io.github.microutils:kotlin-logging:1.7.8")
 	implementation("commons-io:commons-io:2.5")
+	implementation("commons-codec:commons-codec:1.14")
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
